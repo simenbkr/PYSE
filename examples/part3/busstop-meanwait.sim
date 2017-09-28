@@ -1,0 +1,70 @@
+begin
+   external class demos = "demos.atr";
+   demos begin	
+      integer simtime = 100000;
+      integer nextBus;
+      integer nbPassengers = 2000;
+      integer i;
+      text str;
+      ref(Bin) busStop_;
+      ref(RDist) busArrival_;
+      ref(RDist) passengerArrival_;
+      ref(Histogram) waitTime;
+
+      Entity class Bus;	
+      begin
+        ! the bus starts its route;
+        loop:
+          hold(busArrival_.sample);
+          ! the bus arrives at the bus stop;
+          busStop_.give(1);
+          ! wait a little bit;
+          hold(0.0);
+          !the bus departs;
+          busStop_.take(1);
+          ! done, start again;
+        repeat;
+      end *** Bus ***;
+
+      Entity class Passenger;
+      begin	
+        real tmp;
+        ! the passenger is waiting for the first bus arrival;
+        tmp:=time;
+        busStop_.take(1);
+        ! the passenger is entering the bus;
+        waitTime.update(time-tmp);
+        busStop_.give(1);
+        ! done;
+      end *** Passenger ***;
+
+      ! initiate variables;
+      nextBus  := 10;
+      ! create random distributions;
+      ! assume the bus is always on time;
+      busArrival_ :- new Constant("next bus",nextBus);
+      !busArrival_ :- new NegExp("next bus",1/nextBus);
+      ! random passengers arrival during the simulation;
+      passengerArrival_ :- new Uniform("next pass",0,simtime);
+      ! start the Bus;
+      new Bus("bus").schedule(0.0);
+      ! generate nbPassengers Passengers;
+      for i:=1 step 1 until nbPassengers do
+      begin
+        ! insert the passenger nb in the name, otherwise if all the passengers;
+        ! have the same name the id is represented only with 2 digits and we;
+        ! cannot see the difference between for instance pass.32[0] and pass.32[1];
+        ! when tracing.;
+        str :- blanks(4);str.putInt(i);
+        new Passenger("pass."&str&"  ").schedule(passengerArrival_.sample);
+      end;
+      ! create the BusStop;
+      busStop_ :- new Bin("bus stop",0);
+      waitTime :- new Histogram("wait time",0,10,10);
+      !waitTime :- new Histogram("wait time",0,63,10);
+      ! what happens?;
+      !trace;
+      ! put main process in event queue for simtime;
+      hold(simtime);
+   end demos;
+end;

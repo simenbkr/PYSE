@@ -1,0 +1,9 @@
+begin
+  external class demos="demos.atr";
+  demos begin
+    trace;
+    hold(1.0);outText("clock=");printReal(time);outImage;
+    hold(2.0);outText("clock=");printReal(time);outImage;
+    hold(3.0);outText("clock=");printReal(time);outImage;
+  end;
+end;

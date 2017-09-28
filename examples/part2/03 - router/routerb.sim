@@ -1,0 +1,32 @@
+begin
+  external class demos = "demos.atr";
+  demos begin
+    ref(Bin) packets_;
+    ref(RDist) next_;
+    real processingTime;
+   
+    Entity class PacketGenerator;
+    begin
+      loop:
+        hold(next_.sample);
+        packets_.give(1);
+      repeat;
+    end;
+
+    Entity class Router;
+    begin
+      loop:
+        packets_.take(1);
+        hold(processingTime);
+      repeat;
+    end;
+
+    packets_ :-  new Bin("packets",0);
+    next_ :- new NegExp("next",1/10);
+    processingTime := 7;
+    new PacketGenerator("gen").schedule(0.0);
+    new Router("router").schedule(0.0);
+
+    hold(10000.0);
+  end demos;
+end;

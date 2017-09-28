@@ -1,0 +1,32 @@
+BEGIN
+   EXTERNAL CLASS demos = "demos.atr";
+   demos BEGIN
+      REF(Res) router;
+      REF(RDist) next;
+      REAL processingTime;
+      ref(tally) sojournTime;
+      ref(histogram) sojournHistogram;
+
+      ENTITY CLASS Packet;
+      BEGIN
+      	 Real tStart;
+      	 tStart := time;
+         NEW Packet("pkt").schedule(next.sample);
+         router.acquire(1);
+         Hold(processingTime);
+         router.release(1);
+         ! record the sojourn time for statistics ; 
+         sojournTime.update(time-tStart);
+         sojournHistogram.update(time-tStart);
+      END *** packet ***;
+
+	  sojournTime :- NEW tally("sojourn time");
+	  sojournHistogram :- NEW histogram("sojourn hist",5,55,10);
+      router :- NEW Res("router",1);
+      next :- NEW NegExp("next",1/10);
+      processingTime := 7;
+!trace;
+      NEW Packet("pkt").schedule(next.sample);
+      Hold(10000.0);
+   END demos;
+END;

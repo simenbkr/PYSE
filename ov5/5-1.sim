@@ -1,0 +1,67 @@
+BEGIN
+    EXTERNAL CLASS demos = "/home/simen/simula/demos/demos.atr";
+    demos BEGIN
+    
+        REF(RDist) passive_, avg_convo, avg_conn;
+        REAL simtime, max_connection_time, fixed_connection_time, disconnection_time;
+        Ref(Tally) dur;
+        Ref(Tally) lost;
+        integer i;
+
+        ENTITY CLASS Subscriber;
+        BEGIN
+            REF(Timer) tim;
+            REAL startTime;
+            BOOLEAN success;
+            passive:
+                hold(passive_.sample);
+
+            connect:
+                success := true;
+                startTime := time;
+                tim :- NEW Timer("timer", this Subscriber);
+                tim.schedule(0.0);
+                
+                hold(fixed_connection_time + avg_conn.sample);
+
+                if interrupted > 0 then BEGIN
+                    interrupted := 0;
+                    success := false;
+                    lost.update(1);
+                    goto disc;
+                END;
+                tim.interrupt(1);
+
+            convo:
+                hold(avg_convo.sample);
+            disc:
+                hold(disconnection_time);
+
+                if success then dur.update(time - startTime);
+                goto passive;
+        END;
+        
+        ENTITY CLASS Timer(sub); REF(Subscriber) sub;
+        BEGIN
+            hold(max_connection_time);
+            if interrupted = 0 then sub.interrupt(1);
+        END;
+
+        dur :- NEW Tally("dur");
+        lost :- New Tally("lost");
+        disconnection_time := 2 / 10;
+        fixed_connection_time := 2 / 10;
+        max_connection_time := 15;
+
+        simtime := 86400.0 * 30;
+        passive_ :- new NegExp("passive", 1/1800);
+        avg_convo :- new NegExp("avg_convo", 1/180);
+        avg_conn :- new NegExp("avg_conn", 1/3);
+        
+        for i := 1 step 1 until 20 do
+            new Subscriber(edit("sub",i)).schedule(0.0);
+
+
+        hold(simtime);
+    END;
+END;

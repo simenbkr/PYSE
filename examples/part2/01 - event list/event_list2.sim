@@ -1,0 +1,14 @@
+begin
+  external class demos="demos.atr";
+  demos begin
+    Entity class NextStep(t); real t;
+    begin
+      hold(t);outText("clock=");printReal(time);outImage;
+    end;
+    trace;
+    new NextStep("step 1",1.0).schedule(0.0);
+    new NextStep("step 2",2.0).schedule(0.0);
+    new NextStep("step 3",3.0).schedule(1.0);
+    hold(10.0);
+  end;
+end;

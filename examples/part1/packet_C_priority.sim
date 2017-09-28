@@ -1,0 +1,41 @@
+BEGIN
+  EXTERNAL CLASS demos = "demos.atr";
+  demos BEGIN
+    REF(WaitQ) routerQ;
+    REF(RDist) next;
+    REAL processingTime;
+   
+    ENTITY CLASS PacketGenerator;
+    BEGIN
+      LOOP:
+        Hold(next.sample);
+        NEW Packet("pkt").schedule(0.0);
+      REPEAT;
+    END;
+
+    ENTITY CLASS Packet;
+    BEGIN
+      routerQ.wait;
+    END;
+
+    ENTITY CLASS Router;
+    BEGIN
+      REF(Packet) packet_;
+      LOOP:
+        packet_ :- routerQ.coopt;
+        Hold(processingTime);
+        packet_.schedule(0.0);
+      REPEAT;
+    END;
+
+    routerQ :- NEW WaitQ("routerQ");
+    next :- NEW NegExp("next",1/10);
+    processingTime := 7;
+    
+!trace;    
+    NEW PacketGenerator("gen").schedule(0.0);
+    NEW Router("router").schedule(0.0);
+
+    Hold(10000.0);
+  END demos;
+END;

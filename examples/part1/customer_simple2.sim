@@ -1,0 +1,25 @@
+BEGIN
+   EXTERNAL CLASS demos = "demos.atr";
+   demos BEGIN
+      REF(RDist) nextCustomer;
+      REAL time_in_shop;
+
+      ENTITY CLASS customer;
+      BEGIN
+      	outText("           enters system");outImage;
+        NEW customer("customer").schedule(nextCustomer.sample);
+    	Hold(time_in_shop);
+      	outText("           leaves system");outImage;
+      END;
+
+
+	  trace;
+      nextCustomer :- NEW NegExp("nextCustomer",1/4);
+      time_in_shop := 3;
+      
+
+      NEW customer("customer").schedule(nextCustomer.sample);
+
+      Hold(20.0);
+   END demos;
+END;

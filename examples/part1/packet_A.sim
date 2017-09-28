@@ -1,0 +1,23 @@
+BEGIN
+   EXTERNAL CLASS demos = "demos.atr";
+   demos BEGIN
+      REF(Res) router;
+      REF(RDist) next;
+      REAL processingTime;
+
+      ENTITY CLASS Packet;
+      BEGIN
+         NEW Packet("pkt").schedule(next.sample);
+         router.acquire(1);
+         Hold(processingTime);
+         router.release(1);
+      END;
+
+      router :- NEW Res("router",1);
+      next :- NEW NegExp("next",1/10);
+      processingTime := 7;
+!trace;
+      NEW Packet("pkt").schedule(next.sample);
+      Hold(10000.0);
+   END demos;
+END;

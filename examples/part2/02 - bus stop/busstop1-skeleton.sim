@@ -1,0 +1,19 @@
+begin
+  external class demos = "demos.atr";
+  demos begin	
+    integer simtime = 100;
+
+    Entity class Bus;	
+    begin	
+
+    end *** bus ***;
+
+    Entity class Passenger;
+    begin	
+
+    end *** passenger ***;
+
+    ! put main process in event queue for simtime;
+    hold(simtime);
+  end demos;
+end;

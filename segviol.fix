@@ -1,0 +1,2 @@
+"demos.sim", line 1476: ./5-1: System error: Segmentation violation
+cim -m<number> <file.sim>

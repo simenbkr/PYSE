@@ -1,0 +1,58 @@
+begin
+  external class demos = "demos.atr";
+  demos begin
+    ref(WaitQ) routerQ_;
+    ref(RDist) next_, nextFailure_;
+    real processingTime,repairTime;
+    ref(Router) router_;
+    real simtime, forever;
+   
+    Entity class PacketGenerator;
+    begin
+      loop:
+        hold(next_.sample);
+        new Packet("pkt").schedule(0.0);
+      repeat;
+    end;
+
+    Entity class Packet;
+    begin
+      routerQ_.wait;
+    end;
+
+    Entity class Router;
+    begin
+      ref(Packet) packet_;
+      loop:
+        packet_ :- routerQ_.coopt;
+        hold(processingTime);
+        if interrupted>0 then hold(forever);
+        packet_.schedule(0.0);
+      repeat;
+    end;
+    
+    Entity class Failure;
+    begin
+      loop:
+        hold(nextFailure_.sample);
+        router_.interrupt(1);
+        hold(repairTime);
+        router_.interrupt(0);
+      repeat;
+    end;
+    
+    routerQ_ :- new WaitQ("routerQ");
+    next_ :- new NegExp("next",1/10);
+    nextFailure_ :- new NegExp("next failure",1&-3);
+    processingTime := 7;
+    repairTime := 10;
+    simtime := 10000.0;
+    forever := simtime;
+    new PacketGenerator("gen").schedule(0.0);
+    router_ :- new Router("router");
+    router_.schedule(0.0);
+    new Failure("failure").schedule(0.0);
+
+    hold(simtime);
+  end demos;
+end;

@@ -1,0 +1,47 @@
+begin
+   external class demos = "demos.atr";
+   demos begin	
+      integer simtime = 100;
+      integer nextBus;
+      integer nextPassenger;
+      ref(Bin) busStop_;
+
+      Entity class Bus;	
+      begin	
+        ! start next Bus;
+        new Bus("bus").schedule(nextBus);
+        ! the bus arrives at the bus stop;
+        busStop_.give(1);
+        ! wait a little bit;
+        hold(0.0);
+        !the bus departures;
+        busStop_.take(1);
+        ! done;
+      end *** Bus ***;
+
+      Entity class Passenger;
+      begin	
+        ! start next Passenger;
+        new Passenger("passenger").schedule(nextPassenger);
+        ! the passenger is waiting for the first bus arrival;
+        busStop_.take(1);
+        ! the passenger is entering the bus;
+        busStop_.give(1);
+        ! done;
+      end *** Passenger ***;
+
+      ! initiate variables;
+      nextBus  := 10;
+      nextPassenger := 3;
+      ! start first Bus;
+      new Bus("bus").schedule(nextBus);
+      ! start first Passenger;
+      new Passenger("passenger").schedule(nextPassenger);
+      ! create the BusStop;
+      busStop_ :- new Bin("bus stop",0);
+      ! what happens?;
+      trace;
+      ! put main process in event queue for simtime;
+      hold(simtime);
+   end demos;
+end;
