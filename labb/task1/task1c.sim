@@ -33,14 +33,13 @@ BEGIN
             hold(Tw);
             hold(MNO_delay.sample);
            
-            controllerq.wait;
-            
+            controllerq.wait; 
             serverq.wait;
             
             finished_packets.give(1);
             emp_delay.update(time - ts);
             
-            if (time - ts) > 200 then over.update(1);
+            if (time - ts) > 0.200 then over.update(1);
 
         END;
     END;
@@ -72,10 +71,10 @@ BEGIN
 
 
     ! Variable numbers;
-    Tw := 110;
-    Tn := 20;
-    Tc := 0.1;
-    Ts := 2;
+    Tw := 110 / 1000;
+    Tn := 20 / 1000;
+    Tc := 0.1 / 1000;
+    Ts := 2 / 1000;
     p_r := 0.95;
     num_BS := 50;
     num_s := 2;
@@ -84,8 +83,9 @@ BEGIN
     num_meters := 10;
 
     ! Distributions;
-    
-    tbp :- NEW Poisson("Packet", num_BS);
+   
+    ! 1 pakke per meter per sekund => lambda = 1;
+    tbp :- NEW Poisson("Packet", 1);
     MNO_delay :- NEW NegExp("MNO delay", 1/Tn);
     process_c :- NEW NegExp("Process C", 1/Tc);
     process_s :- NEW NegExp("Process S", 1/Ts);
