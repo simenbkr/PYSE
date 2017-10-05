@@ -1,0 +1,71 @@
+BEGIN
+    EXTERNAL CLASS demos = "/home/simen/simula/demos/demos.atr";
+        demos BEGIN
+
+    REAL Tw, Tn, Tc, Ts, p_r;
+    INTEGER num_BS, lambda, sim_n;
+    REF(Bin) finished_packets;
+    REF(RDist) MNO_delay, process_c, process_s;
+    REF(BDist) BS_failure;
+    REF(IDist) tbp;
+    REF(Tally) emp_delay;
+
+    ENTITY CLASS PacketGen;
+    BEGIN
+        LOOP:
+            hold(tbp.sample);
+            NEW Packet("p").schedule(now); 
+        REPEAT;
+    END;
+
+    ENTITY CLASS Packet;
+    BEGIN
+        LONG REAL ts;
+
+        ts := time;
+        
+        if BS_failure.sample then BEGIN
+            finished_packets.give(1);
+        END
+        ELSE BEGIN
+            hold(Tw);
+            hold(MNO_delay.sample);
+            hold(process_c.sample);
+            hold(process_s.sample);
+            finished_packets.give(1);
+            emp_delay.update(time - ts);
+        END;
+    END;
+
+
+    ! Variable numbers;
+    Tw := 0.1100;
+    Tn := 0.0200;
+    Tc := 0.0001;
+    Ts := 0.0020;
+    p_r := 0.95;
+    num_BS := 50;
+    lambda := 1;
+    sim_n := 100000;
+
+    ! Distributions;
+    
+    tbp :- NEW Poisson("Time between packets", num_BS);
+    MNO_delay :- NEW NegExp("MNO delay", 1/Tn);
+    process_c :- NEW NegExp("Process C", 1/Tc);
+    process_s :- NEW NegExp("Process S", 1/Ts);
+    BS_failure :- NEW Draw("BS failure", 1 - p_r);
+
+
+    ! Variable classes;
+    
+    emp_delay :- NEW Tally("delay");
+    
+    finished_packets :- NEW Bin("finished packets", 0);
+    
+    NEW PacketGen("the real g").schedule(0.0);
+
+    finished_packets.take(sim_n);
+
+    END;
+END;
