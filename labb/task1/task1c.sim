@@ -1,23 +1,51 @@
 BEGIN
     EXTERNAL CLASS demos = "/home/simen/simula/demos/demos.atr";
-        demos BEGIN
-
-    REAL Tw, Tn, Tc, Ts, p_r;
-    INTEGER num_BS, lambda, sim_n, num_s, num_meters, i;
+    demos BEGIN
+    
+    REAL Tw, Tn, Tc, Ts, p_r, intensity;
+    INTEGER num_BS, lambda, sim_n, num_s, num_meters, i, j, meters_per_bs;
     REF(Bin) finished_packets;
     REF(RDist) MNO_delay, process_c, process_s;
-    REF(BDist) BS_failure, load_bal;
+    REF(BDist) BS_failure;
     REF(IDist) tbp;
     REF(Tally) emp_delay;
     REF(WaitQ) serverq, controllerq;
-    REF(Count) over;
+    REF(Count) over, packets_recv;
 
+
+    ! Med Poisson kan man slå sammen flere Poisson-prosesser til én. Dette er poenget med BS;
+    ! Denne er derfor depricata, my dudes;
     ENTITY CLASS PacketGen;
     BEGIN
+        INTEGER i, num_packets;
+        
         LOOP:
-            hold(tbp.sample);
-            NEW Packet("p").schedule(now); 
+            num_packets := tbp.sample;
+            for i:=0 step 1 until num_packets do
+                NEW Packet(edit("pakke",i)).schedule(now);
+            
+            hold(1);
+            ! Wait 1s;
         REPEAT;
+    END;
+
+
+    ENTITY CLASS BS(conn_sm, intensity);
+    INTEGER conn_sm;
+    REAL intensity;
+    BEGIN
+        REF(IDist) num_packets;
+        INTEGER num, i;
+        num_packets :- NEW Poisson("Poisson yo", conn_sm * intensity);
+
+        LOOP:
+            num := num_packets.sample;
+
+            for i:=0 step 1 until num do
+                NEW Packet(edit("pakke",i)).schedule(now);
+            
+            hold(1);
+        REPEAT;  
     END;
 
     ENTITY CLASS Packet;
@@ -25,9 +53,9 @@ BEGIN
         LONG REAL ts;
 
         ts := time;
-        
+       
         if BS_failure.sample then BEGIN
-            finished_packets.give(1);
+            !finished_packets.give(1);
         END
         ELSE BEGIN
             hold(Tw);
@@ -36,11 +64,11 @@ BEGIN
             controllerq.wait; 
             serverq.wait;
             
-            finished_packets.give(1);
             emp_delay.update(time - ts);
             
             if (time - ts) > 0.200 then over.update(1);
-
+            finished_packets.give(1);
+            packets_recv.update(1);
         END;
     END;
 
@@ -80,18 +108,25 @@ BEGIN
     num_s := 2;
     lambda := 1;
     sim_n := 100000;
-    num_meters := 10;
+    num_meters := 100000;
+    
+    meters_per_bs := num_meters / num_BS;
+
+    ! Anta to oppdateringer i timen, hver på ca
+      1 MB. Anta pakkesize for data på ca 1000B
+      => pakker/sekund blir 2*10^6 / 10^3 = 0.555555
+      ~ 0.60
+    ;
+    intensity := 0.06;
 
     ! Distributions;
    
-    ! 1 pakke per meter per sekund => lambda = 1;
-    tbp :- NEW Poisson("Packet", 1);
+    ! 1 pakke per meter per sekund => lambda = 1 * num_meters;
+    tbp :- NEW Poisson("Packet", intensity);
     MNO_delay :- NEW NegExp("MNO delay", 1/Tn);
     process_c :- NEW NegExp("Process C", 1/Tc);
     process_s :- NEW NegExp("Process S", 1/Ts);
     BS_failure :- NEW Draw("BS failure", 1 - p_r);
-    load_bal :- NEW Draw("Load balancing", 1/num_s);
-
     ! Variable classes;
     
     emp_delay :- NEW Tally("delay");
@@ -100,17 +135,25 @@ BEGIN
     serverq :- NEW WaitQ("Server queue"); 
     controllerq :- NEW WaitQ("ControllerQ");
 
+    ! Counts ;
+    
     over :- NEW Count("over 200ms");
+    packets_recv :- NEW Count("Received");
 
     ! Instantiate classes my dudes;
-    
+!    trace;
     NEW Controller("C", controllerq).schedule(0.0);
 
     for i:=1 step 1 until num_s do
         NEW Server(edit("Server",i), serverq).schedule(0.0);
     
-    for i:=1 step 1 until num_meters do
-        NEW PacketGen(edit("Meter",i)).schedule(0.0);
+    
+
+    for i:=1 step 1 until num_BS do
+        NEW BS(edit("BS",i), meters_per_BS, intensity).schedule(0.0);
+
+    !for j:=1 step 1 until num_meters do
+    !    NEW PacketGen(edit("Meter",j)).schedule(0.0);
     
     
     finished_packets.take(sim_n);
