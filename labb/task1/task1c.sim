@@ -36,10 +36,10 @@ BEGIN
     BEGIN
         REF(IDist) num_packets;
         INTEGER num, i;
-        num_packets :- NEW Poisson("Poisson yo", conn_sm * intensity);
+        !num_packets :- NEW Poisson("Poisson yo", conn_sm * intensity);
 
         LOOP:
-            num := num_packets.sample;
+            num := tbp.sample;
 
             for i:=0 step 1 until num do
                 NEW Packet(edit("pakke",i)).schedule(now);
@@ -105,10 +105,10 @@ BEGIN
     Ts := 2 / 1000;
     p_r := 0.95;
     num_BS := 50;
-    num_s := 2;
+    num_s := 4;
     lambda := 1;
     sim_n := 100000;
-    num_meters := 100000;
+    num_meters := 10000;
     
     meters_per_bs := num_meters / num_BS;
 
@@ -122,7 +122,7 @@ BEGIN
     ! Distributions;
    
     ! 1 pakke per meter per sekund => lambda = 1 * num_meters;
-    tbp :- NEW Poisson("Packet", intensity);
+    tbp :- NEW Poisson("Poisson packet", meters_per_bs * intensity);
     MNO_delay :- NEW NegExp("MNO delay", 1/Tn);
     process_c :- NEW NegExp("Process C", 1/Tc);
     process_s :- NEW NegExp("Process S", 1/Ts);
