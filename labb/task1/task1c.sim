@@ -3,7 +3,7 @@ BEGIN
     demos BEGIN
     
     REAL Tw, Tn, Tc, Ts, p_r, intensity;
-    INTEGER num_BS, lambda, sim_n, num_s, num_meters, i, j, meters_per_bs;
+    INTEGER num_BS, sim_n, num_s, num_meters, i, j, meters_per_bs;
     REF(Bin) finished_packets;
     REF(RDist) MNO_delay, process_c, process_s;
     REF(BDist) BS_failure;
@@ -30,14 +30,11 @@ BEGIN
     END;
 
 
-    ENTITY CLASS BS(conn_sm, intensity);
-    INTEGER conn_sm;
-    REAL intensity;
+    ENTITY CLASS BS;
     BEGIN
         REF(IDist) num_packets;
         INTEGER num, i;
-        !num_packets :- NEW Poisson("Poisson yo", conn_sm * intensity);
-
+        
         LOOP:
             num := tbp.sample;
 
@@ -105,23 +102,22 @@ BEGIN
     Ts := 2 / 1000;
     p_r := 0.95;
     num_BS := 50;
-    num_s := 4;
-    lambda := 1;
+    num_s := 2;
     sim_n := 100000;
-    num_meters := 10000;
+    num_meters := 1000;
     
     meters_per_bs := num_meters / num_BS;
 
     ! Anta to oppdateringer i timen, hver på ca
-      1 MB. Anta pakkesize for data på ca 1000B
-      => pakker/sekund blir 2*10^6 / 10^3 = 0.555555
-      ~ 0.60
+      100 kB. Anta pakkesize for data på ca 1000B
+      => pakker/sekund blir 2*10^5 / 10^3 = 0.0555555
+      ~ 0.06
     ;
     intensity := 0.06;
 
     ! Distributions;
    
-    ! 1 pakke per meter per sekund => lambda = 1 * num_meters;
+    ! ers;
     tbp :- NEW Poisson("Poisson packet", meters_per_bs * intensity);
     MNO_delay :- NEW NegExp("MNO delay", 1/Tn);
     process_c :- NEW NegExp("Process C", 1/Tc);
@@ -150,7 +146,7 @@ BEGIN
     
 
     for i:=1 step 1 until num_BS do
-        NEW BS(edit("BS",i), meters_per_BS, intensity).schedule(0.0);
+        NEW BS(edit("BS",i)).schedule(0.0);
 
     !for j:=1 step 1 until num_meters do
     !    NEW PacketGen(edit("Meter",j)).schedule(0.0);
