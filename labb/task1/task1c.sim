@@ -31,10 +31,10 @@ BEGIN
         ts := time;
         if BS_failure.sample then BEGIN
             finished_packets.give(1);
-            outInt(packet_n, 8);
-            outText(",");
-            outInt(0,1);
-            outimage;
+            !outInt(packet_n, 8);
+            !outText(",");
+            !outInt(0,1);
+            !outimage;
         END
         ELSE BEGIN
             hold(Tw);
@@ -49,10 +49,11 @@ BEGIN
             finished_packets.give(1);
             packets_recv.update(1);
 
-            outInt(packet_n, 8);
-            outText(",");
-            outfix(time - ts, 7, 12);
-            outimage;
+            ! Uncomment to get a trace of packets;
+            !outInt(packet_n, 8);
+            !outText(",");
+            !outfix(time - ts, 7, 12);
+            !outimage;
         END;
     END;
 
