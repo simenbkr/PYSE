@@ -1,0 +1,155 @@
+! Recommended compiler:         emacs                                                         ;
+! Compile with extended memory: cim -m500 lab_task2.cim                                       ;
+! Run compiled program:         ./lab_task2                                                   ;
+
+begin
+  external class demos="/home/simen/simula/demos/demos.atr";
+  demos
+  begin
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!! ;
+    !!!! DEFINE VARIABLES !!!! ;
+    !!!!!!!!!!!!!!!!!!!!!!!!!! ;
+
+    !! Task Specific Variables !! ;
+
+    integer numberofservers;
+
+    long real totalFailTime;
+    long real time_now;
+
+    boolean controller;
+
+
+    !! DEMOS Specific Variables !! ;
+    ref (RDist) controllerFailureIntensity_;
+    ref (RDist) serverFailureIntensity_;
+    ref (RDist) serverRepairIntensity_;
+    ref (RDist) controllerRepairIntensity_;
+    ref (CondQ) failing_;
+    ref (Res) n_servers;
+
+
+    !!!!!!!!!!!!!!!!!!!!!!!! ;
+    !!!! ENTITY CLASSES !!!! ;
+    !!!!!!!!!!!!!!!!!!!!!!!! ;
+
+    !! Entity: ServerFailure !! ;
+    Entity class ServerFailure;
+    begin
+      integer size;
+
+      LOOP:
+        size := n_servers.avail;
+
+        if size ne 0 then begin
+          hold(serverFailureIntensity_.sample);
+          n_servers.acquire(1);
+          failing_.signal;
+          numberofservers := numberofservers - 1;
+
+          hold(serverRepairIntensity_.sample);
+
+          if controller then begin
+            n_servers.release(1);
+            failing_.signal;
+          end;
+
+          numberofservers := numberofservers + 1;
+
+        end;
+
+        if size <= 0 then begin
+          hold(serverFailureIntensity_.sample);
+          numberofservers := numberofservers - 1;
+
+          hold(serverRepairIntensity_.sample);
+          numberofservers := numberofservers + 1;
+        end;
+      REPEAT;
+    end;
+
+
+    !! Entity: ControllerFailure !! ;
+    Entity class ControllerFailure;
+    begin
+      integer size;
+
+      LOOP:
+        controller := true;
+        hold(controllerFailureIntensity_.sample);
+        controller := false;
+
+        size := n_servers.avail;
+
+        n_servers.acquire(size);
+        failing_.signal;
+
+        hold(controllerRepairIntensity_.sample);
+
+        n_servers.release(numberofservers);
+        failing_.signal;
+      REPEAT;
+    end;
+
+
+    !! Entity: ELHUB !! ;
+    Entity class ELHUB;
+    begin
+      integer size;
+      long real timestamp;
+      long real timestamp2;
+      long real failtime;
+
+      LOOP:
+        failing_.waituntil(n_servers.avail <= 0 );
+        size := n_servers.avail;
+
+        timestamp := time;
+        failing_.waituntil(n_servers.avail > 0 );
+        timestamp2 := time;
+
+        failtime := timestamp2 - timestamp;
+        totalFailTime := totalFailTime + failtime;
+      REPEAT;
+    end;
+
+
+    !!!!!!!!!!!!!!!!!!!!!!!!! ;
+    !!!! VARIABLE VALUES !!!! ;
+    !!!!!!!!!!!!!!!!!!!!!!!!! ;
+
+    !! Generator Intensity !! ;
+    controllerFailureIntensity_ :- new NegExp("CFail", 0.01); !! 1/0.01 ;
+    serverFailureIntensity_     :- new NegExp("SFail", 0.01); !! 1/0.01 ;
+    controllerRepairIntensity_  :- new NegExp("CRep", 2);     !! 1/2 ;
+    serverRepairIntensity_      :- new NegExp("SRep", 1);     !! 1/1 ;
+
+    !! Initiate number of servers !! ;
+    numberofservers := 3;
+
+    !! Initiate ConditionQ !! ;
+    failing_ :- new CondQ("Failing");
+
+    !! Initiate Res !! ;
+    n_servers :- new Res("Res Server", 3);
+
+    !! Start Entities !! ;
+    new ELHUB("ELHUB").schedule(0);
+    new ControllerFailure("CF1").schedule(0);
+    new ServerFailure("SF1").schedule(0);
+    new ServerFailure("SF2").schedule(0);
+    new ServerFailure("SF3").schedule(0);
+
+    !! Force Hold Simulation Active !! ;
+    hold(1000000);
+
+    !! Shows Final Result !! ;
+    time_now := time;
+    outtext("totalFailTime: ");
+    outint(totalFailTime, 0);
+    outtext(" | Time: ");
+    outint(time_now, 0);
+    outimage;
+  end;
+end;

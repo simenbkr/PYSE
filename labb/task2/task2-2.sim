@@ -1,0 +1,130 @@
+BEGIN
+    EXTERNAL CLASS DEMOS = "/home/simen/simula/demos/demos.atr";
+    DEMOS BEGIN
+       
+        REAL tot_downtime, tmp, server_fail_intensity, controller_fail_intensity, restart_s_mean, restart_c_mean, pass_to_act_mean, sim_time;
+        INTEGER num_server;
+        REF(RDIST) server_fail_wait, controller_fail_wait, restart_s, restart_c, pass_to_act;
+        REF(RES) available_servers;
+        BOOLEAN controller_up;
+        REF(CONDQ) hub_failure;
+        REF(TALLY) downtime_;
+        
+
+        ENTITY CLASS SERVER;
+        BEGIN
+            INTEGER available;
+
+            LOOP:
+                available := available_servers.avail;
+
+                if available > 0 THEN
+                BEGIN
+                
+                    HOLD(server_fail_wait.sample);
+                    available_servers.acquire(1);
+                    hub_failure.signal;
+                    
+                    num_server := num_server - 1;
+                    
+                    HOLD(restart_s.sample);
+
+                    if (controller_up) THEN
+                    BEGIN
+                        available_servers.release(1);
+                        hub_failure.signal;
+                    END;
+
+                    num_server := num_server + 1;
+                    
+                END
+                ELSE
+                BEGIN
+
+                    HOLD(server_fail_wait.sample);
+                    num_server := num_server - 1;
+
+                    HOLD(restart_s.sample);
+                    num_server := num_server + 1;
+
+                END;
+            REPEAT;
+        END;
+
+        ENTITY CLASS CONTROLLER;
+        BEGIN
+            INTEGER available;
+
+            LOOP:
+                controller_up := true;
+                
+                HOLD(controller_fail_wait.sample);
+                controller_up := false;
+
+                available := available_servers.avail;
+                available_servers.acquire(available);
+                hub_failure.signal;
+
+                HOLD(restart_c.sample);
+
+                available_servers.release(num_server);
+                hub_failure.signal;
+            REPEAT;
+        END;
+
+        ENTITY CLASS HUB;
+        BEGIN
+            INTEGER available;
+            LONG REAL downtime;
+            
+            ! The Hub is down when 0 servers are available, or the controller is down;
+            LOOP:
+                hub_failure.waituntil(available_servers.avail < 1 or not controller_up);
+                downtime := time;
+                hub_failure.waituntil(available_servers.avail > 0 and controller_up);
+                downtime := time - downtime;
+                tot_downtime := tot_downtime + downtime;
+                downtime_.update(downtime);
+            REPEAT;
+        END;
+  
+        ! Variables for the system;
+        server_fail_intensity := 0.01;
+        controller_fail_intensity := 0.01;
+        restart_s_mean := 1;
+        restart_c_mean := 2;
+        pass_to_act_mean := 5;
+        controller_up := true;
+        num_server := 3;
+        tot_downtime := 0;
+        ! DEMOS-objects and distributions;
+        downtime_ :- NEW TALLY("Downtime");
+        hub_failure :- NEW CONDQ("Hub failure");
+        available_servers :- NEW RES("AvailServers", num_server);
+        server_fail_wait :- NEW NegExp("serverfail wait", server_fail_intensity);
+        controller_fail_wait :- NEW NegExp("controllerfail wait", controller_fail_intensity);
+        restart_s :- NEW NegExp("restart s", restart_s_mean);
+        restart_c :- NEW NegExp("restart c", restart_c_mean);
+        pass_to_act :- NEW NegExp("passtoact", pass_to_act_mean);
+        
+        NEW HUB("Hub").schedule(0.0);
+        NEW CONTROLLER("hehe").schedule(0.0);
+        NEW SERVER("S1").schedule(0.0);
+        NEW SERVER("S2").schedule(0.0);
+        NEW SERVER("S3").schedule(0.0);
+
+        sim_time := 1000000;
+        HOLD(sim_time);
+        
+        outText("Total downtime:");
+        outimage;
+        outFix(tot_downtime, 10, 15);
+        outimage;
+        outText("As a percentage:");
+        tot_downtime := tot_downtime / sim_time * 100;
+        outFix(tot_downtime, 5, 7);
+        outText("%");
+        outimage;
+
+    END;
+END;

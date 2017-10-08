@@ -3,56 +3,38 @@ BEGIN
     demos BEGIN
     
     REAL Tw, Tn, Tc, Ts, p_r, intensity;
-    INTEGER num_BS, sim_n, num_s, num_meters, i, j, meters_per_bs;
+    INTEGER num_BS, sim_n, num_s, num_meters, i, j, meters_per_bs, packet_n;
     REF(Bin) finished_packets;
-    REF(RDist) MNO_delay, process_c, process_s;
+    REF(RDist) MNO_delay, process_c, process_s, packet_wait;
     REF(BDist) BS_failure;
-    REF(IDist) tbp;
     REF(Tally) emp_delay;
     REF(WaitQ) serverq, controllerq;
     REF(Count) over, packets_recv;
 
-
-    ! Med Poisson kan man slå sammen flere Poisson-prosesser til én. Dette er poenget med BS;
-    ! Denne er derfor depricata, my dudes;
-    ENTITY CLASS PacketGen;
+    ENTITY CLASS SM;
     BEGIN
-        INTEGER i, num_packets;
-        
+        INTEGER i;
+
         LOOP:
-            num_packets := tbp.sample;
-            for i:=0 step 1 until num_packets do
-                NEW Packet(edit("pakke",i)).schedule(now);
-            
-            hold(1);
-            ! Wait 1s;
+            hold(packet_wait.sample);
+            NEW Packet(edit("pakke",i)).schedule(now);
+            i := i + 1;
+            packet_n := packet_n + 1;
         REPEAT;
     END;
 
 
-    ENTITY CLASS BS;
-    BEGIN
-        REF(IDist) num_packets;
-        INTEGER num, i;
-        
-        LOOP:
-            num := tbp.sample;
-
-            for i:=0 step 1 until num do
-                NEW Packet(edit("pakke",i)).schedule(now);
-            
-            hold(1);
-        REPEAT;  
-    END;
 
     ENTITY CLASS Packet;
     BEGIN
         LONG REAL ts;
-
         ts := time;
-       
         if BS_failure.sample then BEGIN
-            !finished_packets.give(1);
+            finished_packets.give(1);
+            outInt(packet_n, 8);
+            outText(",");
+            outInt(0,1);
+            outimage;
         END
         ELSE BEGIN
             hold(Tw);
@@ -66,6 +48,11 @@ BEGIN
             if (time - ts) > 0.200 then over.update(1);
             finished_packets.give(1);
             packets_recv.update(1);
+
+            outInt(packet_n, 8);
+            outText(",");
+            outfix(time - ts, 7, 12);
+            outimage;
         END;
     END;
 
@@ -104,8 +91,8 @@ BEGIN
     num_BS := 50;
     num_s := 2;
     sim_n := 100000;
-    num_meters := 1000;
-    
+    num_meters := 10000;
+    packet_n := 0;
     meters_per_bs := num_meters / num_BS;
 
     ! Anta to oppdateringer i timen, hver på ca
@@ -116,15 +103,13 @@ BEGIN
     intensity := 0.06;
 
     ! Distributions;
-   
-    ! ers;
-    tbp :- NEW Poisson("Poisson packet", meters_per_bs * intensity);
     MNO_delay :- NEW NegExp("MNO delay", 1/Tn);
+    packet_wait :- NEW NegExp("Packet wait", intensity);
     process_c :- NEW NegExp("Process C", 1/Tc);
     process_s :- NEW NegExp("Process S", 1/Ts);
     BS_failure :- NEW Draw("BS failure", 1 - p_r);
+
     ! Variable classes;
-    
     emp_delay :- NEW Tally("delay");
     
     finished_packets :- NEW Bin("finished", 0);
@@ -132,27 +117,19 @@ BEGIN
     controllerq :- NEW WaitQ("ControllerQ");
 
     ! Counts ;
-    
     over :- NEW Count("over 200ms");
     packets_recv :- NEW Count("Received");
 
     ! Instantiate classes my dudes;
-!    trace;
     NEW Controller("C", controllerq).schedule(0.0);
 
     for i:=1 step 1 until num_s do
         NEW Server(edit("Server",i), serverq).schedule(0.0);
     
-    
+    for i:=1 step 1 until num_meters do
+        NEW SM(edit("SM",i)).schedule(0.0);
 
-    for i:=1 step 1 until num_BS do
-        NEW BS(edit("BS",i)).schedule(0.0);
-
-    !for j:=1 step 1 until num_meters do
-    !    NEW PacketGen(edit("Meter",j)).schedule(0.0);
-    
-    
     finished_packets.take(sim_n);
-
+!    noreport;
     END;
 END;
