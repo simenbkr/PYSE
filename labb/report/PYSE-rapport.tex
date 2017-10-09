@@ -3,8 +3,8 @@
 \newcommand{\beq}{\begin{equation}}
 \newcommand{\eeq}{\end{equation}}
 \setlength{\parindent}{0pt}
-\renewcommand{\abstractname}{My Funny Abstract Title, if any}
 \usepackage{graphicx}
+\usepackage{float}
 \graphicspath{ {images/} }
 \usepackage{url}
 \usepackage{listings}
@@ -17,9 +17,15 @@
 
 \section{Report}
 
-In this lab, we will be simulating a smartgrid-system. Task one focuses on the performance, while task two focuses on the dependability and availability of the system.
-
 \subsection{Introduction}
+
+In this lab, we will be simulating a smart grid system. The lab is divided into two parts, part one focuses mainly on performance, while part two focuses on availability and dependability. These aspects are important to consider when building a complex system such as a smart grid. Simulation can be an excellent tool in estimating unknown parameters given a set of known or otherwise estimated parameters.
+
+Both tasks will be solved using SIMULA with the DEMOS-library, as well as diagrams from draw.io.
+
+The objective in task one is to estimate the delay, depending on how many devices are connected, and how many servers the ELHUB has to handle the load.
+
+The objective in task two is to estimate the downtime of the system.
 
 \newpage
 \subsection{Answer to questions}
@@ -37,32 +43,32 @@ The events in this system are the transmission of packets between nodes in the n
 
 2) 
 
-\begin{figure}
-	\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{activity_diagram_1.png}
+\begin{figure}[H]
+	\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{activity_diagram_1.png}
 	\centering
 \end{figure}
 
-\newpage
 
 3)
 See the appendix for the complete code. I have chosen not to include the base stations or the network as entities in my models because they are constant, and do not change over time, as opposed to packets (timestamp) and the controller and servers (queues). The intensity has been chosen in an arbitrary way, using the following assumptions:\\
-1: A smart meter sends out updates two times per hour.\\
-2: Updates consists of 100kB, and each packet carries (on average) 1000 bytes of data.\\
-This gives an intensity $\lambda$ of $200kB / (1000B \cdot 60 \cdot 60) = 0.055555 \approx 0.060$ packets per second.
+- A smart meter sends out updates two times per hour.\\
+- Updates consists of 100kB, and each packet carries (on average) 1000 bytes of data.\\\\
+This gives an intensity $\lambda$ of $\frac{200kB}{1000B \cdot 60 \cdot 60} = 0.055555 \approx 0.060$ packets per second.
 Given that this is the result of a Poisson process, the time between packets is negatively exponentially distributed with parameter $\lambda$.
 
 It is worth noting that all time is calculated in seconds in this implementation of the simulation..
 
 Simulating with one smart meter, 50 base stations and two servers gives the following result.
 
-\begin{figure}
-	\includegraphics[width=0.8\textwidth]{demos_1.png}
-	%\centering
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{demos_1.png}
+	\centering
 \end{figure}
 
-\newpage
 
-4) It appears that when we increase the numbers of smart meters, the delay increases. This makes sense, as more smart meters means more packets, meaning longer queue-times. The delay time seems to be about equal when looking at small numbers of smart meters, however when reaching the hundreds of thousands, the delay time increases at a slower pace with more servers than with fewer. 
+4) It appears that when we increase the numbers of smart meters, the delay increases. This makes sense, as more smart meters means more packets, meaning longer queue-times. The delay time seems to be about equal when looking at small numbers of smart meters, however when reaching larger numbers, the delay time increases at a slower pace with more servers than with fewer. This is reasonable, as queues will fill up faster when fewer servers are handling packets.
+
+Note that it appears that the packet loss increase, but this is probably not true. What is happening is that packets dropped are recorded earlier, while more succesful packets are stuck in queues. This is simply a side effect of having a set number of packets, and recording lost packets the instant they are lost.
 
 Summarized:
 
@@ -100,7 +106,7 @@ delay 86986  14.037     8.0822.740&-002     0.112    28.215
 
 Put into a graph, red being for $N_s = 2$, blue being $N_s = 4$.
 
-\begin{figure}
+\begin{figure}[H]
 	\includegraphics[width=\textwidth]{geogebrabilde.png}
 	\centering
 \end{figure}
@@ -115,14 +121,13 @@ $$94929\ packets\ sent,\ 5071\ packets\ lost\ =>\ P(packet\ lost)\ = 0.053418870
 
 CDF for end-to-end packet delay:
 
-\begin{figure}
+\begin{figure}[H]
 	\includegraphics[width=\textwidth]{cdf_plot.png}
 	\centering
 \end{figure}
 
 The source for the data and the python-script used to generate the plot is in the appendix
 
-\newpage
 
 \subsubsection{Task 2}
 
@@ -136,7 +141,10 @@ The events being a server going up/down and the controller going up/down.
 The ELHUB is unavailable when the controller is down, or when no servers are up, or both.
 
 2) 
-<activity diagram>
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{activity-diagram2.png}
+	\centering
+\end{figure}
 
 See the appendix for the code.
 
@@ -144,13 +152,13 @@ See the appendix for the code.
 3)
 Result of a run of the simulation:
 
-\begin{figure}
+\begin{figure}[H]
 	\includegraphics[width=\textwidth]{demos_2.png}
 	\centering
 \end{figure}
 
 4)
-4) In my model I have chosen to not include switchover time, as I was told that it was not necessarry. As such, I will be assuming that the switchover time is 0.
+4) In my model I have chosen to not include switch-over time, as I was told that it was not necessary As such, I will be assuming that the switch-over time is 0.
 
 Using the analytic expression we get:
 
@@ -160,10 +168,12 @@ $$U_{hub} = U_s + U_c - U_s \cdot U_c$$
 Inserting the numbers given into the last equation yields:
 $$U_{hub} = 0.0049760 \approx 0.498\%\ downtime$$
 
-In my simulation the ELHUB had $0.490\%$ downtime, which is minusculely lower than the analytic expression gives. It appears that when the simulation time approaches infinity, the simulated downtime will approach the analytic downtime. 
+In my simulation the ELHUB had $0.491\%$ downtime, which is minusculely lower than the analytic expression gives. It appears that when the simulation time approaches infinity, the simulated downtime will approach the analytic downtime. This means that our simulation is an acceptable approach to reality.
 
 
 \subsection{Summary}
+
+In this lab, we have looked at the performance and dependability of a smart grid. We have simulated the delay of packets traversing the system, and the uptime of parts of the system.
 
 
 \section*{Appendix}
@@ -460,7 +470,7 @@ restart_c :- NEW NegExp("restart c", restart_c_mean);
 pass_to_act :- NEW NegExp("passtoact", pass_to_act_mean);
 
 NEW HUB("Hub").schedule(0.0);
-NEW CONTROLLER("hehe").schedule(0.0);
+NEW CONTROLLER("C1").schedule(0.0);
 NEW SERVER("S1").schedule(0.0);
 NEW SERVER("S2").schedule(0.0);
 NEW SERVER("S3").schedule(0.0);

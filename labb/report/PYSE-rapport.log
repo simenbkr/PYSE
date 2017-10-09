@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.10.7)  8 OCT 2017 15:34
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.10.7)  9 OCT 2017 11:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -55,29 +55,37 @@ Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
+(/usr/share/texlive/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count88
+\float@exts=\toks15
+\float@box=\box26
+\@float@everytoks=\toks16
+\@floatcapt=\box27
+)
 (/usr/share/texlive/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip10
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 (/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
-\lst@mode=\count88
-\lst@gtempboxa=\box26
-\lst@token=\toks15
-\lst@length=\count89
+\lst@mode=\count89
+\lst@gtempboxa=\box28
+\lst@token=\toks17
+\lst@length=\count90
 \lst@currlwidth=\dimen105
-\lst@column=\count90
-\lst@pos=\count91
+\lst@column=\count91
+\lst@pos=\count92
 \lst@lostspace=\dimen106
 \lst@width=\dimen107
-\lst@newlines=\count92
-\lst@lineno=\count93
+\lst@newlines=\count93
+\lst@lineno=\count94
 \lst@maxwidth=\dimen108
 
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2015/06/04 1.6 (Carsten Heinz)
-\c@lstnumber=\count94
-\lst@skipnumbers=\count95
-\lst@framebox=\box27
+\c@lstnumber=\count95
+\lst@skipnumbers=\count96
+\lst@framebox=\box29
 )
 (/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg
 File: listings.cfg 2015/06/04 1.6 listings configuration
@@ -102,17 +110,17 @@ LaTeX Font Info:    ... okay on input line 13.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count96
+\scratchcounter=\count97
 \scratchdimen=\dimen109
-\scratchbox=\box28
-\nofMPsegments=\count97
-\nofMParguments=\count98
-\everyMPshowfont=\toks16
-\MPscratchCnt=\count99
+\scratchbox=\box30
+\nofMPsegments=\count98
+\nofMParguments=\count99
+\everyMPshowfont=\toks18
+\MPscratchCnt=\count100
 \MPscratchDim=\dimen110
-\MPnumerator=\count100
-\makeMPintoPDFobject=\count101
-\everyMPtoPDFconversion=\toks17
+\MPnumerator=\count101
+\makeMPintoPDFobject=\count102
+\everyMPtoPDFconversion=\toks19
 ) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
 Package: pdftexcmds 2016/05/21 v0.22 Utility functions of pdfTeX for LuaTeX (HO
 )
@@ -162,7 +170,7 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-\c@lstlisting=\count102
+\c@lstlisting=\count103
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <12> on input line 16.
 LaTeX Font Info:    External font `cmex10' loaded for size
@@ -176,7 +184,7 @@ LaTeX Warning: No \author given.
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Underfull \hbox (badness 10000) in paragraph at lines 34--35
+Underfull \hbox (badness 10000) in paragraph at lines 40--41
 
  []
 
@@ -184,75 +192,79 @@ Underfull \hbox (badness 10000) in paragraph at lines 34--35
 File: images/activity_diagram_1.png Graphic file (type png)
 
 <use images/activity_diagram_1.png>
-Package pdftex.def Info: images/activity_diagram_1.png used on input line 41.
-(pdftex.def)             Requested size: 275.63612pt x 541.39452pt.
- [3] [4 <./images/activity_diagram_1.png>]
+Package pdftex.def Info: images/activity_diagram_1.png used on input line 47.
+(pdftex.def)             Requested size: 248.07341pt x 487.25682pt.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 51.
+(Font)              <10.95> on input line 56.
 
-<images/demos_1.png, id=23, 732.7375pt x 925.4575pt>
+Underfull \hbox (badness 10000) in paragraph at lines 52--58
+
+ []
+
+[3 <./images/activity_diagram_1.png>]
+<images/demos_1.png, id=20, 732.7375pt x 925.4575pt>
 File: images/demos_1.png Graphic file (type png)
  <use images/demos_1.png>
-Package pdftex.def Info: images/demos_1.png used on input line 59.
-(pdftex.def)             Requested size: 288.0011pt x 363.75124pt.
+Package pdftex.def Info: images/demos_1.png used on input line 64.
+(pdftex.def)             Requested size: 360.0pt x 454.69258pt.
 
-[5] [6 <./images/demos_1.png>]
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 73--74
+[4] [5 <./images/demos_1.png>]
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 79--80
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 74--76
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 80--82
 [][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 77--78
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 83--84
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 78--80
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 84--86
 [][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 81--82
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 87--88
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (34.2041pt too wide) in paragraph at lines 82--85
+Overfull \hbox (34.2041pt too wide) in paragraph at lines 88--91
 [][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 88--89
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 94--95
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 89--91
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 95--97
 [][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 92--93
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 98--99
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 93--95
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 99--101
 [][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (21.06396pt too wide) in paragraph at lines 96--97
+Overfull \hbox (21.06396pt too wide) in paragraph at lines 102--103
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (27.63403pt too wide) in paragraph at lines 97--99
+Overfull \hbox (27.63403pt too wide) in paragraph at lines 103--105
 [][][][][][][][][][][][][][][][][][][][][] 
  []
 
@@ -260,116 +272,127 @@ Overfull \hbox (27.63403pt too wide) in paragraph at lines 97--99
 File: images/geogebrabilde.png Graphic file (type png)
 
 <use images/geogebrabilde.png>
-Package pdftex.def Info: images/geogebrabilde.png used on input line 104.
+Package pdftex.def Info: images/geogebrabilde.png used on input line 110.
 (pdftex.def)             Requested size: 360.0pt x 188.68327pt.
- [7]
-Overfull \hbox (10.69827pt too wide) detected at line 114
+ [6]
+Overfull \hbox (10.69827pt too wide) detected at line 120
 \OT1/cmr/m/n/10.95 94929 \OML/cmm/m/it/10.95 packets sent;  \OT1/cmr/m/n/10.95 
 5071 \OML/cmm/m/it/10.95 packets lost  \OT1/cmr/m/n/10.95 =\OML/cmm/m/it/10.95 
 >  P\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 packet lost\OT1/cmr/m/n/10.95 )  = 
 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 0534188709457
  []
 
-<images/cdf_plot.png, id=38, 908.39375pt x 889.3225pt>
+<images/cdf_plot.png, id=36, 908.39375pt x 889.3225pt>
 File: images/cdf_plot.png Graphic file (type png)
 
 <use images/cdf_plot.png>
-Package pdftex.def Info: images/cdf_plot.png used on input line 119.
+Package pdftex.def Info: images/cdf_plot.png used on input line 125.
 (pdftex.def)             Requested size: 360.0pt x 352.43877pt.
- [8 <./images/geogebrabilde.png>] [9 <./images/cdf_plot.png>] <images/demos_2.p
-ng, id=45, 728.7225pt x 818.05624pt>
-File: images/demos_2.png Graphic file (type png)
+ [7 <./images/geogebrabilde.png>]
+<images/activity-diagram2.png, id=41, 588.1975pt x 1155.31625pt>
+File: images/activity-diagram2.png Graphic file (type png)
 
-<use images/demos_2.png>
-Package pdftex.def Info: images/demos_2.png used on input line 148.
+<use images/activity-diagram2.png>
+Package pdftex.def Info: images/activity-diagram2.png used on input line 145.
+(pdftex.def)             Requested size: 360.0pt x 707.10414pt.
+ [8 <./images/cdf_plot.png>]
+Overfull \vbox (165.7039pt too high) has occurred while \output is active []
+
+
+[9 <./images/activity-diagram2.png>]
+<images/demos_2.png, id=49, 728.7225pt x 818.05624pt>
+File: images/demos_2.png Graphic file (type png)
+ <use images/demos_2.png>
+Package pdftex.def Info: images/demos_2.png used on input line 156.
 (pdftex.def)             Requested size: 360.0pt x 404.12149pt.
- [10] [11 <./images/demos_2.png>]
-Overfull \hbox (113.04492pt too wide) in paragraph at lines 180--181
+
+[10 <./images/demos_2.png>]
+Overfull \hbox (113.04492pt too wide) in paragraph at lines 188--189
 [][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (7.92383pt too wide) in paragraph at lines 182--183
+Overfull \hbox (7.92383pt too wide) in paragraph at lines 190--191
 [][][][][][][][][][][][][][][][][][] 
  []
 
-[12]
-LaTeX Font Info:    Try loading font information for OML+cmr on input line 222.
+[11]
+LaTeX Font Info:    Try loading font information for OML+cmr on input line 230.
 
  (/usr/share/texlive/texmf-dist/tex/latex/base/omlcmr.fd
 File: omlcmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 222.
- [13] [14]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 328.
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 230.
+ [12] [13]
+[14]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 336.
 
-
-(/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
+ (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 328.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 336.
 
-Overfull \hbox (349.56738pt too wide) in paragraph at lines 334--336
+Overfull \hbox (349.56738pt too wide) in paragraph at lines 342--344
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][
 ][][][][][][][] 
  []
 
 [15]
-Overfull \hbox (513.81909pt too wide) in paragraph at lines 357--358
+Overfull \hbox (513.81909pt too wide) in paragraph at lines 365--366
 [][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (198.45581pt too wide) in paragraph at lines 359--360
+Overfull \hbox (198.45581pt too wide) in paragraph at lines 367--368
 [][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[16] [17]
-Overfull \hbox (126.18506pt too wide) in paragraph at lines 432--433
+[16]
+Overfull \hbox (126.18506pt too wide) in paragraph at lines 440--441
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (113.04492pt too wide) in paragraph at lines 434--435
+Overfull \hbox (113.04492pt too wide) in paragraph at lines 442--443
 [][][][][][][][][][][][][][][][][][][][] 
  []
 
-
-Overfull \hbox (93.33472pt too wide) in paragraph at lines 436--437
+[17]
+Overfull \hbox (93.33472pt too wide) in paragraph at lines 444--445
 [][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (14.4939pt too wide) in paragraph at lines 455--456
+Overfull \hbox (14.4939pt too wide) in paragraph at lines 463--464
 [][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (119.61499pt too wide) in paragraph at lines 456--457
+Overfull \hbox (119.61499pt too wide) in paragraph at lines 464--465
 [][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (198.45581pt too wide) in paragraph at lines 457--458
+Overfull \hbox (198.45581pt too wide) in paragraph at lines 465--466
 [][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (14.4939pt too wide) in paragraph at lines 460--462
+Overfull \hbox (14.4939pt too wide) in paragraph at lines 468--470
 [][][][][][][][][][][][][][][] 
  []
 
 [18] [19] (./PYSE-rapport.aux) ) 
 Here is how much of TeX's memory you used:
- 2819 strings out of 494945
- 41035 string characters out of 6181032
- 119004 words of memory out of 5000000
- 6095 multiletter control sequences out of 15000+600000
+ 2880 strings out of 494945
+ 41906 string characters out of 6181032
+ 120403 words of memory out of 5000000
+ 6151 multiletter control sequences out of 15000+600000
  8811 words of font info for 31 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 39i,6n,32p,404b,1391s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 39i,6n,32p,483b,1385s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/publ
 ic/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
 fonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
@@ -378,11 +401,12 @@ i8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/s
 hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/te
 xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-Output written on PYSE-rapport.pdf (19 pages, 343978 bytes).
+xmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on PYSE-rapport.pdf (19 pages, 399016 bytes).
 PDF statistics:
- 109 PDF objects out of 1000 (max. 8388607)
- 72 compressed objects within 1 object stream
+ 115 PDF objects out of 1000 (max. 8388607)
+ 75 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 26 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 31 words of extra memory for PDF output out of 10000 (max. 10000000)
 
