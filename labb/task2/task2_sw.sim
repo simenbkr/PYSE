@@ -2,53 +2,63 @@ BEGIN
     EXTERNAL CLASS DEMOS = "/home/simen/simula/demos/demos.atr";
     DEMOS BEGIN
        
-        REAL tot_downtime, tmp, server_fail_intensity, controller_fail_intensity, restart_s_mean, restart_c_mean, pass_to_act_mean, sim_time;
-        INTEGER num_server, num_active, num_passive;
+        REAL tot_downtime, server_fail_intensity, controller_fail_intensity, restart_s_mean, restart_c_mean, pass_to_act_mean, sim_time;
+        INTEGER num_server;
         REF(RDIST) server_fail_wait, controller_fail_wait, restart_s, restart_c, pass_to_act;
-        REF(RES) available_servers;
+        REF(RES) available_servers, active_;
         BOOLEAN controller_up;
         REF(CONDQ) hub_failure;
         REF(TALLY) downtime_;
         
 
-        ENTITY CLASS SERVER;
+        ENTITY CLASS SERVER(init_);
+        BOOLEAN init_;
         BEGIN
             INTEGER available;
+            
+            if not init_ then goto passive;
+            active_.acquire(1);
 
-            LOOP:
-                available := available_servers.avail;
-
-                if available > 0 THEN
-                BEGIN
-                
-                    HOLD(server_fail_wait.sample);
-                    available_servers.acquire(1);
-                    hub_failure.signal;
+            active:
+                LOOP:
+                    available := available_servers.avail;
                     
-                    num_server := num_server - 1;
-                    
-                    HOLD(restart_s.sample);
-
-                    if (controller_up) THEN
+                    if available > 0 THEN
                     BEGIN
-                        available_servers.release(1);
+                        HOLD(server_fail_wait.sample);
+                        available_servers.acquire(1);
                         hub_failure.signal;
+                        
+                        num_server := num_server - 1;
+                        active_.release(1);
+                        
+                        HOLD(restart_s.sample);
+
+                        if (controller_up) THEN
+                        BEGIN
+                            available_servers.release(1);
+                            hub_failure.signal;
+                        END;
+                        num_server := num_server + 1;
+                        goto passive;
+                    END
+                    ELSE
+                    BEGIN
+
+                        HOLD(server_fail_wait.sample);
+                        num_server := num_server - 1;
+                        active_.release(1); 
+                        
+                        HOLD(restart_s.sample);
+                        num_server := num_server + 1;
+                        goto passive;
                     END;
+                REPEAT;
 
-                    num_server := num_server + 1;
-
-                END
-                ELSE
-                BEGIN
-
-                    HOLD(server_fail_wait.sample);
-                    num_server := num_server - 1;
-
-                    HOLD(restart_s.sample);
-                    num_server := num_server + 1;
-
-                END;
-            REPEAT;
+            passive:
+                active_.acquire(1);
+                HOLD(pass_to_act.sample);
+                goto active;
         END;
 
         ENTITY CLASS CONTROLLER;
@@ -72,6 +82,7 @@ BEGIN
             REPEAT;
         END;
 
+        ! ELHUB-class. Keeps track of downtime using a conditional queue;
         ENTITY CLASS HUB;
         BEGIN
             INTEGER available;
@@ -88,7 +99,7 @@ BEGIN
             REPEAT;
         END;
   
-        ! Variables for the system;
+        ! System variables;
         server_fail_intensity := 0.01;
         controller_fail_intensity := 0.01;
         restart_s_mean := 1;
@@ -96,31 +107,38 @@ BEGIN
         pass_to_act_mean := 5;
         controller_up := true;
         num_server := 3;
-        num_active := 2;
-        num_passive := 1;
         tot_downtime := 0;
-        ! DEMOS-objects and distributions;
+
+        ! DEMOS-objects and distributions;        
         downtime_ :- NEW TALLY("Downtime");
         hub_failure :- NEW CONDQ("Hub failure");
+        
         available_servers :- NEW RES("AvailServers", num_server);
+        active_ :- NEW RES("Active", 2);
+
+
         server_fail_wait :- NEW NegExp("serverfail wait", server_fail_intensity);
         controller_fail_wait :- NEW NegExp("controllerfail wait", controller_fail_intensity);
         restart_s :- NEW NegExp("restart s", restart_s_mean);
         restart_c :- NEW NegExp("restart c", restart_c_mean);
         pass_to_act :- NEW NegExp("passtoact", pass_to_act_mean);
         
+        ! Initialise objects;
         NEW HUB("Hub").schedule(0.0);
-        NEW CONTROLLER("hehe").schedule(0.0);
-        NEW SERVER("S1").schedule(0.0);
-        NEW SERVER("S2").schedule(0.0);
-        NEW SERVER("S3").schedule(0.0);
-
-        sim_time := 1000000;
+        NEW CONTROLLER("C1").schedule(0.0);
+        NEW SERVER("S1", true).schedule(0.0);
+        NEW SERVER("S2", true).schedule(0.0);
+        NEW SERVER("S3", false).schedule(0.0);
+        
+        ! Arbitrarily chosen number for keeping simulation going;
+        sim_time := 10000000;
         HOLD(sim_time);
         
+        ! Output recorded downtime;
+
         outText("Total downtime:");
         outimage;
-        outFix(tot_downtime, 10, 15);
+        outFix(tot_downtime, 10, 20);
         outimage;
         outText("As a percentage:");
         tot_downtime := tot_downtime / sim_time * 100;

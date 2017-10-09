@@ -1,4 +1,3 @@
-
 \documentclass[11pt]{article}
 \newcommand{\beq}{\begin{equation}}
 \newcommand{\eeq}{\end{equation}}
@@ -21,11 +20,12 @@
 
 In this lab, we will be simulating a smart grid system. The lab is divided into two parts, part one focuses mainly on performance, while part two focuses on availability and dependability. These aspects are important to consider when building a complex system such as a smart grid. Simulation can be an excellent tool in estimating unknown parameters given a set of known or otherwise estimated parameters.
 
-Both tasks will be solved using SIMULA with the DEMOS-library, as well as diagrams from draw.io.
+Both tasks will be solved by discrete event simulation using SIMULA with the DEMOS-library.
 
 The objective in task one is to estimate the delay, depending on how many devices are connected, and how many servers the ELHUB has to handle the load.
 
 The objective in task two is to estimate the downtime of the system.
+
 
 \newpage
 \subsection{Answer to questions}
@@ -44,7 +44,7 @@ The events in this system are the transmission of packets between nodes in the n
 2) 
 
 \begin{figure}[H]
-	\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{activity_diagram_1.png}
+	\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{activiy_diagram1.png}
 	\centering
 \end{figure}
 
@@ -107,8 +107,9 @@ delay 86986  14.037     8.0822.740&-002     0.112    28.215
 Put into a graph, red being for $N_s = 2$, blue being $N_s = 4$.
 
 \begin{figure}[H]
-	\includegraphics[width=\textwidth]{geogebrabilde.png}
-	\centering
+\begin{center}
+	\makebox[\textwidth]{\includegraphics[width=\paperwidth]{geogebrabilde.png}}
+\end{center}
 \end{figure}
 
 The program version with a logging function is attached in the appendix.
@@ -117,7 +118,7 @@ The program version with a logging function is attached in the appendix.
 
 If a packet is lost, it is not taken into account when calculating the delay, nor is it taken into account when plotting the CDF for the delay as the delay of a dropped packet is undefined.
 Parameters set for the generation of this data: $N_s = 2, N_sm = 10000$.
-$$94929\ packets\ sent,\ 5071\ packets\ lost\ =>\ P(packet\ lost)\ = 0.0534188709457$$
+$$94929\ packets\ sent,\ 5071\ packets\ lost\ \rightarrow \ P(packet\ lost)\ = 0.0534188709457$$
 
 CDF for end-to-end packet delay:
 
@@ -142,34 +143,54 @@ The ELHUB is unavailable when the controller is down, or when no servers are up,
 
 2) 
 \begin{figure}[H]
-	\includegraphics[width=\textwidth]{activity-diagram2.png}
+	\includegraphics[width=\textwidth]{activity_diagram2.png}
 	\centering
 \end{figure}
 
 See the appendix for the code.
 
+The implementation uses the resource-class to keep track of the servers, both available and passive. A server has two states; passive and active. I have made the following assumptions in this task:
+- When a server restarts, it is fixed, and after a restart it is instantly passive.
+- A server cannot fail while in passive mode
+
+I think these are reasonable assumptions - servers may fail for no "reason" at all, but it is much more likely to fail when stressed. Therefore I assume the probability that an idle server failing is trivial. A server going into passive mode after a restart, and then into active mode if needed, and after a switch-over time is also a fair assumption.
 
 3)
-Result of a run of the simulation:
+Result of a run of the simulation with sim\_time set to 10 million:
 
 \begin{figure}[H]
-	\includegraphics[width=\textwidth]{demos_2.png}
+	\includegraphics[width=\textwidth]{demos_2-2.png}
 	\centering
 \end{figure}
 
-4)
-4) In my model I have chosen to not include switch-over time, as I was told that it was not necessary As such, I will be assuming that the switch-over time is 0.
+4) I have solved this task using a simulation with and a simulation without switch-over time. For the one without switch-over time we get the following:
 
 Using the analytic expression we get:
 
 $$U_s = \frac{\lambda_{fs}^3}{(\lambda_{fs} + \mu_{rs})^3}$$
 $$U_c = \frac{\lambda_{fc}}{(\lambda_{fc} + \mu_{rc})}$$
+
+$$U_c \approx 0.004975124$$
+
 $$U_{hub} = U_s + U_c - U_s \cdot U_c$$
+
 Inserting the numbers given into the last equation yields:
-$$U_{hub} = 0.0049760 \approx 0.498\%\ downtime$$
 
-In my simulation the ELHUB had $0.491\%$ downtime, which is minusculely lower than the analytic expression gives. It appears that when the simulation time approaches infinity, the simulated downtime will approach the analytic downtime. This means that our simulation is an acceptable approach to reality.
+$$U_{hub} \approx 0.0049760 = 0.4976\%\ downtime$$
 
+Using the analytic expression for $U_s$ when the switch-over time is non-zero gives:
+
+$$U_s \approx \frac{\lambda_{fs}^3(\lambda_{fs}(4\mu_{rs}^2 + 9\mu_{rs}\mu_{sw} + 3\mu_{sw}^3))}{3\mu_{rs}^2(\mu_{rs}+\mu_{sw})(\lambda_{fs}(8\mu_{rs} + 3\mu_{sw}) + \mu_{rs}(2\mu_{rs}+\mu_{sw})} $$
+
+$$U_s \approx 0.000005563$$
+
+$$U_{hub} = U_s + U_c - U_s \cdot U_c$$
+
+Inserting $U_s$ and $U_c$ into the equation for $U_{hub}$ yields:
+
+$$U_{hub} = 0.004980659939888693 \approx 0.004981 = 0.4981\%$$
+ 
+In my simulation without switch-over time the ELHUB had $0.491\%$ downtime, which is minusculely lower than the analytic expression gives. In the simulation with switch-over time, I achieved $0.4975\%$ downtime. It appears that when the simulation time approaches infinity, the simulated downtime will approach the analytically correct downtime. This would mean that this simulation is a correct solution.
 
 \subsection{Summary}
 
@@ -357,6 +378,164 @@ plt.show()
 \end{lstlisting}
 
 \subsubsection{Code from task 2-2 and 2-3}
+
+With switch-over time:
+
+\begin{lstlisting}
+BEGIN
+EXTERNAL CLASS DEMOS = "/home/simen/simula/demos/demos.atr";
+DEMOS BEGIN
+
+REAL tot_downtime, server_fail_intensity, controller_fail_intensity, restart_s_mean, restart_c_mean, pass_to_act_mean, sim_time;
+INTEGER num_server;
+REF(RDIST) server_fail_wait, controller_fail_wait, restart_s, restart_c, pass_to_act;
+REF(RES) available_servers, active_;
+BOOLEAN controller_up;
+REF(CONDQ) hub_failure;
+REF(TALLY) downtime_;
+
+
+ENTITY CLASS SERVER(init_);
+BOOLEAN init_;
+BEGIN
+INTEGER available;
+
+if not init_ then goto passive;
+active_.acquire(1);
+
+active:
+LOOP:
+available := available_servers.avail;
+
+if available > 0 THEN
+BEGIN
+HOLD(server_fail_wait.sample);
+available_servers.acquire(1);
+hub_failure.signal;
+
+num_server := num_server - 1;
+active_.release(1);
+
+HOLD(restart_s.sample);
+
+if (controller_up) THEN
+BEGIN
+available_servers.release(1);
+hub_failure.signal;
+END;
+num_server := num_server + 1;
+goto passive;
+END
+ELSE
+BEGIN
+
+HOLD(server_fail_wait.sample);
+num_server := num_server - 1;
+active_.release(1); 
+
+HOLD(restart_s.sample);
+num_server := num_server + 1;
+goto passive;
+END;
+REPEAT;
+
+passive:
+active_.acquire(1);
+HOLD(pass_to_act.sample);
+goto active;
+END;
+
+ENTITY CLASS CONTROLLER;
+BEGIN
+INTEGER available;
+
+LOOP:
+controller_up := true;
+
+HOLD(controller_fail_wait.sample);
+controller_up := false;
+
+available := available_servers.avail;
+available_servers.acquire(available);
+hub_failure.signal;
+
+HOLD(restart_c.sample);
+
+available_servers.release(num_server);
+hub_failure.signal;
+REPEAT;
+END;
+
+! ELHUB-class. Keeps track of downtime using a conditional queue;
+ENTITY CLASS HUB;
+BEGIN
+INTEGER available;
+LONG REAL downtime;
+
+! The Hub is down when 0 servers are available, or the controller is down;
+LOOP:
+hub_failure.waituntil(available_servers.avail < 1 or not controller_up);
+downtime := time;
+hub_failure.waituntil(available_servers.avail > 0 and controller_up);
+downtime := time - downtime;
+tot_downtime := tot_downtime + downtime;
+downtime_.update(downtime);
+REPEAT;
+END;
+
+! System variables;
+server_fail_intensity := 0.01;
+controller_fail_intensity := 0.01;
+restart_s_mean := 1;
+restart_c_mean := 2;
+pass_to_act_mean := 5;
+controller_up := true;
+num_server := 3;
+tot_downtime := 0;
+
+! DEMOS-objects and distributions;        
+downtime_ :- NEW TALLY("Downtime");
+hub_failure :- NEW CONDQ("Hub failure");
+
+available_servers :- NEW RES("AvailServers", num_server);
+active_ :- NEW RES("Active", 2);
+
+
+server_fail_wait :- NEW NegExp("serverfail wait", server_fail_intensity);
+controller_fail_wait :- NEW NegExp("controllerfail wait", controller_fail_intensity);
+restart_s :- NEW NegExp("restart s", restart_s_mean);
+restart_c :- NEW NegExp("restart c", restart_c_mean);
+pass_to_act :- NEW NegExp("passtoact", pass_to_act_mean);
+
+! Initialise objects;
+NEW HUB("Hub").schedule(0.0);
+NEW CONTROLLER("C1").schedule(0.0);
+NEW SERVER("S1", true).schedule(0.0);
+NEW SERVER("S2", true).schedule(0.0);
+NEW SERVER("S3", false).schedule(0.0);
+
+! Arbitrarily chosen number for keeping simulation going;
+sim_time := 10000000;
+HOLD(sim_time);
+
+! Output recorded downtime;
+
+outText("Total downtime:");
+outimage;
+outFix(tot_downtime, 10, 20);
+outimage;
+outText("As a percentage:");
+tot_downtime := tot_downtime / sim_time * 100;
+outFix(tot_downtime, 5, 7);
+outText("%");
+outimage;
+
+END;
+END;
+
+\end{lstlisting}
+
+Without switch-over time:
 
 \begin{lstlisting}
 
