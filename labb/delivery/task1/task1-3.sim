@@ -1,0 +1,136 @@
+BEGIN
+    EXTERNAL CLASS demos = "/home/simen/simula/demos/demos.atr";
+    demos BEGIN
+    
+    REAL Tw, Tn, Tc, Ts, p_r, intensity;
+    INTEGER num_BS, sim_n, num_s, num_meters, i, j, meters_per_bs, packet_n;
+    REF(Bin) finished_packets;
+    REF(RDist) MNO_delay, process_c, process_s, packet_wait;
+    REF(BDist) BS_failure;
+    REF(Tally) emp_delay;
+    REF(WaitQ) serverq, controllerq;
+    REF(Count) over, packets_recv;
+
+    ENTITY CLASS SM;
+    BEGIN
+        INTEGER i;
+
+        LOOP:
+            hold(packet_wait.sample);
+            NEW Packet(edit("pakke",i)).schedule(now);
+            i := i + 1;
+            packet_n := packet_n + 1;
+        REPEAT;
+    END;
+
+
+
+    ENTITY CLASS Packet;
+    BEGIN
+        LONG REAL ts;
+        ts := time;
+        if BS_failure.sample then BEGIN
+            finished_packets.give(1);
+            !outInt(packet_n, 8);
+            !outText(",");
+            !outInt(0,1);
+            !outimage;
+        END
+        ELSE BEGIN
+            hold(Tw);
+            hold(MNO_delay.sample);
+           
+            controllerq.wait; 
+            serverq.wait;
+            
+            emp_delay.update(time - ts);
+            
+            if (time - ts) > 0.200 then over.update(1);
+            finished_packets.give(1);
+            packets_recv.update(1);
+
+            ! Uncomment to get a trace of packets;
+            !outInt(packet_n, 8);
+            !outText(",");
+            !outfix(time - ts, 7, 12);
+            !outimage;
+        END;
+    END;
+
+    ENTITY CLASS Controller(waitq_);
+    REF(WaitQ) waitq_;
+    BEGIN
+        REF(Packet) pakka;
+
+        LOOP:
+            pakka :- waitq_.coopt;
+            hold(process_c.sample);
+            pakka.schedule(now);        
+        REPEAT;
+    END;
+
+    ENTITY CLASS Server(waitq_);
+    REF(WaitQ) waitq_;
+    BEGIN
+        
+        REF(Packet) pakka;
+
+        LOOP:
+            pakka :- waitq_.coopt;
+            hold(process_s.sample);
+            pakka.schedule(now);
+        REPEAT;   
+    END;
+
+
+    ! Variable numbers;
+    Tw := 110 / 1000;
+    Tn := 20 / 1000;
+    Tc := 0.1 / 1000;
+    Ts := 2 / 1000;
+    p_r := 0.95;
+    num_BS := 50;
+    num_s := 2;
+    sim_n := 100000;
+    num_meters := 10000;
+    packet_n := 0;
+    meters_per_bs := num_meters / num_BS;
+
+    ! Anta to oppdateringer i timen, hver på ca
+      100 kB. Anta pakkesize for data på ca 1000B
+      => pakker/sekund blir 2*10^5 / 10^3 = 0.0555555
+      ~ 0.06
+    ;
+    intensity := 0.06;
+
+    ! Distributions;
+    MNO_delay :- NEW NegExp("MNO delay", 1/Tn);
+    packet_wait :- NEW NegExp("Packet wait", intensity);
+    process_c :- NEW NegExp("Process C", 1/Tc);
+    process_s :- NEW NegExp("Process S", 1/Ts);
+    BS_failure :- NEW Draw("BS failure", 1 - p_r);
+
+    ! Variable classes;
+    emp_delay :- NEW Tally("delay");
+    
+    finished_packets :- NEW Bin("finished", 0);
+    serverq :- NEW WaitQ("Server queue"); 
+    controllerq :- NEW WaitQ("ControllerQ");
+
+    ! Counts ;
+    over :- NEW Count("over 200ms");
+    packets_recv :- NEW Count("Received");
+
+    ! Instantiate classes my dudes;
+    NEW Controller("C", controllerq).schedule(0.0);
+
+    for i:=1 step 1 until num_s do
+        NEW Server(edit("Server",i), serverq).schedule(0.0);
+    
+    for i:=1 step 1 until num_meters do
+        NEW SM(edit("SM",i)).schedule(0.0);
+
+    finished_packets.take(sim_n);
+!    noreport;
+    END;
+END;
